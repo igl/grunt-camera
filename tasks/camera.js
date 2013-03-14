@@ -1,41 +1,41 @@
 'use strict';
-var exec = require('child_process').exec,
+var child = require('child_process'),
+    util = require('util'),
     path = require('path');
 
 module.exports = function (grunt) {
 
     grunt.registerMultiTask('camera', 'PhantomJS Camera', function () {
         var cb = this.async(),
+            cmd = 'phantomjs runner.js'
             options = {
                 width: 800,
                 height: 600,
                 dest: '',
                 pages: []
             },
-            cmd = 'phantomjs runner.js';
+			spawnPhantom = function () {
+				var cp = child.exec(cmd, options.execOptions, function (err, stdout, stderr) {
+						if (_.isFunction(options.callback)) {
+							options.callback.call(this, err, stdout, stderr, cb);
+						} else {
+							if (err && options.failOnError) {
+								grunt.warn(err);
+							}
+							cb();
+						}
+					});
+			};
 
-        console.log('grunt-camera: cmd: %j, options:', cmd, options, this.data);
+        child.exec('phantomjs -v', function (err, stdout, stderr) {
+			if (err) grunt.warn(stderr);
+			grunt.log.ok(util.format('Using PhantomJS %s...', stdout.trim()));
 
-        return;
+			// todo: spawnPhantom( mixin(<defaults>, <args>) ) ...
+		});
 
-        var cp = exec(cmd, options.execOptions, function (err, stdout, stderr) {
-                if (_.isFunction(options.callback)) {
-                    options.callback.call(this, err, stdout, stderr, cb);
-                } else {
-                    if (err && options.failOnError) {
-                        grunt.warn(err);
-                    }
-                    cb();
-                }
-            });
+		// Debug:
+		//console.log('grunt-camera: cmd: %j, options:', cmd, options, this.data);
 
-
-        if (options.stdout) {
-            cp.stdout.pipe(process.stdout);
-        }
-
-        if (options.stderr) {
-            cp.stderr.pipe(process.stderr);
-        }
     });
 };
