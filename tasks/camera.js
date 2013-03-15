@@ -1,41 +1,74 @@
 'use strict';
 var child = require('child_process'),
     util = require('util'),
-    path = require('path');
+    path = require('path'),
+    async = require('async'),
+    mixin = function(origin, add) {
+        if (!add || typeof add !== 'object') return origin;
+
+        var keys = Object.keys(add);
+        var i = keys.length;
+        while (i--) {
+            origin[keys[i]] = add[keys[i]];
+        }
+        return origin;
+    };
 
 module.exports = function (grunt) {
 
     grunt.registerMultiTask('camera', 'PhantomJS Camera', function () {
-        var cb = this.async(),
-            cmd = 'phantomjs runner.js'
-            options = {
-                width: 800,
-                height: 600,
+        var cwd = process.cwd(),
+            done = this.async(),
+            opts = mixin({
                 dest: '',
-                pages: []
+                pages: [],
+                width: 800,
+                height: 600
+            }, this.data),
+            findPhantom = function (name, cb) {
+                child.exec(name + ' -v', {}, function (err, stdout, stderr) {
+                    if (err) return cb(stderr);
+                    cb(null, util.format('Using PhantomJS %s', stdout.trim()));
+                });
             },
-			spawnPhantom = function () {
-				var cp = child.exec(cmd, options.execOptions, function (err, stdout, stderr) {
-						if (_.isFunction(options.callback)) {
-							options.callback.call(this, err, stdout, stderr, cb);
-						} else {
-							if (err && options.failOnError) {
-								grunt.warn(err);
-							}
-							cb();
-						}
-					});
-			};
+            createScreenshots = function () {
+                async.each(opts.pages, spawnPhantom, function (err) {
+                    if (err) return grunt.warn(err);
+                    done();
+                });
+            },
+			spawnPhantom = function (url, cb) {
+                var filename = path.join(cwd, opts.dest, path.basename(url, path.extname(url)) + '.png');
+                if (!url.match(/^http/i)) {
+                    url = 'http://' + url;
+                }
+                child.spawn(
+                      'phantomjs'
+                    , [ 'runner.js', url, filename, opts.width, opts.height]
+                    , { cwd: cwd, detached: false, stdio: 'inherit' }
+                    , function (err, stdout, stderr) {
+                        if (err) return cb(stderr);
+                        cb(null);
+                    }
+                );
+            };
 
-        child.exec('phantomjs -v', function (err, stdout, stderr) {
-			if (err) grunt.warn(stderr);
-			grunt.log.ok(util.format('Using PhantomJS %s...', stdout.trim()));
-
-			// todo: spawnPhantom( mixin(<defaults>, <args>) ) ...
-		});
-
-		// Debug:
-		//console.log('grunt-camera: cmd: %j, options:', cmd, options, this.data);
+        findPhantom('phantomjs', function (err, msg) {
+            if (err) {
+                if (process.platform === 'win32') {
+                    findPhantom('phantomjs.exe', function (err, msg) {
+                        if (err) return grunt.warn(stderr);
+                        grunt.log.ok(msg);
+                        createScreenshots();
+                    });
+                } else {
+                    return grunt.warn(stderr);
+                }
+            } else {
+                grunt.log.ok(msg);
+                createScreenshots();
+            }
+        });
 
     });
 };
