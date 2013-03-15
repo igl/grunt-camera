@@ -2,24 +2,31 @@ var page = require('webpage').create(),
     system = require('system'),
     ss_url = system.args[1],
     ss_filename = system.args[2],
+    ss_width = system.args[3],
+    ss_height = system.args[4],
     ss_time = Date.now();
 
-console.log('args', system.args);
+// Debug:
+console.log('Phantom Args:', system.args.join(' '));
 
-if (system.args.length < 3) {
+if (system.args.length < 5) {
     console.log('Usage: runner.js <url> <filename>', system.args);
     phantom.exit();
 }
 
+page.viewportSize = {
+    width: ss_width, height: ss_height
+};
+
 page.open(ss_url, function (status) {
     if (status !== 'success') {
-        throw new Error('Failed to load the address');
-    } else {
-        console.log('Page loaded...');
+        console.error('Failed to load "' + ss_url + '"');
+        return phantom.exit();
     }
 
-    page.render(ss_filename + '.png');
+    page.render(ss_filename);
     ss_time = Date.now() - ss_time;
-    console.log('Screenshot completed in ' + ss_time + 'ms');
+
+    console.log('Captured in ' + ss_time + 'ms (' + ss_filename + ')');
     phantom.exit();
 });
