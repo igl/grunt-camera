@@ -2,14 +2,14 @@ module.exports = function(grunt) {
     grunt.initConfig({
         camera: {
             dev: {
-                width: 1024,
-                height: 768,
                 dest: 'screenshots/',
                 pages: [
-                    'localhost:3000',
-                    'localhost:3000/about',
-                    'localhost:3000/categories'
-                ]
+                    'localhost:3000/index.html',
+                    'localhost:3000/about.html',
+                    'localhost:3000/categories.html'
+                ],
+                width: 1024,
+                height: 768
             }
         }
     });
