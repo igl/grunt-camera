@@ -7,6 +7,7 @@ dojo/util
 
 # Temp Folder #
 ###############
+screenshots/*g
 node_modules
 build
 
