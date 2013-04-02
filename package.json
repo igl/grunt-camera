@@ -1,8 +1,21 @@
 {
-    "name": "grunt-camera",
-    "version": "0.0.1",
-    "dependencies": {
-        "grunt":   "0.4.x",
-        "async":   "0.2.x"
+      "name": "grunt-camera"
+    , "version": "0.0.1"
+    , "repository": {
+          "type": "git"
+        , "url":  "git://github.com/gruntjs/grunt-contrib-coffee.git"
+    }
+    , "engines": {
+        "node": ">=0.8.0"
+    }
+    , "dependencies": {
+          "async":  "0.2.x"
+        , "mkdirp": "0.3.x"
+    }
+    , "peerDependencies": {
+        "grunt": "0.4.x"
+    }
+    , "devDependencies": {
+          "grunt": "0.4.x"
     }
 }

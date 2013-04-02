@@ -1,9 +1,12 @@
 'use strict';
-var child = require('child_process'),
-    util = require('util'),
-    path = require('path'),
-    async = require('async'),
-    mixin = function(origin, add) {
+
+
+var child  = require('child_process'),
+    util   = require('util'),
+    path   = require('path'),
+    async  = require('async'),
+    mkdirp = require('mkdirp'),
+    mixin  = function(origin, add) {
         if (!add || typeof add !== 'object') return origin;
 
         var keys = Object.keys(add);
@@ -14,10 +17,11 @@ var child = require('child_process'),
         return origin;
     };
 
+
 module.exports = function (grunt) {
 
     grunt.registerMultiTask('camera', 'PhantomJS Camera', function () {
-        var cwd = process.cwd(),
+        var cwd  = process.cwd(),
             done = this.async(),
             opts = mixin({
                 dest: '',
@@ -71,4 +75,5 @@ module.exports = function (grunt) {
         });
 
     });
+
 };

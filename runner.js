@@ -6,8 +6,8 @@ var page = require('webpage').create(),
     ss_height = system.args[4],
     ss_time = Date.now();
 
-// Debug:
-console.log('Phantom Args:', system.args.join(' '));
+// Debug
+// console.log('Phantom Args:', system.args.join(' '));
 
 if (system.args.length < 5) {
     console.log('Usage: runner.js <url> <filename>', system.args);
